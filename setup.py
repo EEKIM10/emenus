@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='eekues',
-    version='0.1.0',
+    version='0.1.1',
     packages=['eekues'],
     url='https://github.com/EEKIM10/emenus.git',
     license='MIT',

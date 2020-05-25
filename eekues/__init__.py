@@ -38,24 +38,26 @@ class Confirm(Menu):
         self.res = None
 
     @button("\N{WHITE HEAVY CHECK MARK}")
-    async def on_yes(self, payload: discord.RawReactionActionEvent) -> bool:
+    async def on_yes(self, payload: discord.RawReactionActionEvent):
         """
         the check mark reaction event. This simply returns True.
 
         :param payload: provided by the reaction event.
         :return True:
         """
-        return True
+        self.res = True
+        self.stop()
 
     @button("\N{CROSS MARK}")
-    async def on_no(self, payload: discord.RawReactionActionEvent) -> bool:
+    async def on_no(self, payload: discord.RawReactionActionEvent):
         """
         the cross mark reaction event. This simply returns False.
 
         :param payload: provided by the reaction event.
         :return False:
         """
-        return False
+        self.res = False
+        self.stop()
 
     async def send_initial_message(self, ctx, channel):
         title = self.kwargs.get("title", "Are you sure?")

@@ -35,7 +35,7 @@ async def delete(ctx):
 ```
 #### case 2:
 ```python
-from emenus import Confirm as C
+from eekues import Confirm as C
 
 @bot.command()
 @commands.has_permissions(ban_members=True)
