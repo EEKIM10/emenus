@@ -32,6 +32,12 @@ class Confirm(Menu):
     The reactions that are added are :white_check_mark: and :x:.
     """
     def __init__(self, description: str = DEFAULT_CONF, *args, **kwargs):
+        """
+
+        :param description: the description of the embedded message to be sent
+        :param args: ignored
+        :param kwargs: [...] arguments to pass to discord.Embed()  || delete_message_after [BaseClass Port]
+        """
         super().__init__(check_embeds=True, delete_message_after=kwargs.get("delete_message_after", True))
         self.msg = description[:2048]
         self.kwargs = kwargs
@@ -97,6 +103,10 @@ class ColourSelector(Menu):
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        :param args: ignored
+        :param kwargs: [colours|colors] see class docstring
+        """
         super().__init__(*args, **kwargs)
         self.ret = None
         self.emojis = list(kwargs.get("colours", {}).keys()) or list(kwargs.get("colors", {}).keys()) or list(DEFAULT_COLORs.keys())
