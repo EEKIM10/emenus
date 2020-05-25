@@ -45,6 +45,8 @@ class Confirm(Menu):
         :param payload: provided by the reaction event.
         :return True:
         """
+        if self.bot.get_user(payload.user_id).bot:
+            return
         self.res = True
         self.stop()
 
@@ -56,6 +58,8 @@ class Confirm(Menu):
         :param payload: provided by the reaction event.
         :return False:
         """
+        if self.bot.get_user(payload.user_id).bot:
+            return
         self.res = False
         self.stop()
 
@@ -75,7 +79,7 @@ class Confirm(Menu):
     async def result(self, ctx, *, channel: discord.abc.Messageable = None) -> bool:
         """Returns the result of the reaction event (True/False)"""
         chan = channel or ctx.channel
-        await self.start(ctx, channel=chan)
+        await self.start(ctx, channel=chan, wait=True)
         return self.res
 
 
@@ -99,6 +103,8 @@ class ColourSelector(Menu):
         self._colours = kwargs.get("colours", {}) or kwargs.get("colors", {}) or DEFAULT_COLORs
 
     async def callback(self, payload: discord.RawReactionActionEvent):
+        if self.bot.get_user(payload.user_id).bot:
+            return
         self.ret = self._colours[str(payload.emoji)]
         self.bot.dispatch("colour_picked", self.ret)
         self.stop()
@@ -129,7 +135,6 @@ class ColourSelector(Menu):
         :return:
         """
         await self.start(ctx, wait=True)
-        self.ret = await self.bot.wait_for("colour_picked")
         ret = self.ret["value"]
         try:
             return discord.Colour(ret)
