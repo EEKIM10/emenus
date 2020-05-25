@@ -9,16 +9,21 @@ classes, implement them, etc etc.
 ---
 
 ### Installing:
-This can only be done through git, at the moment:
+This can be done through git:
 ```shell script
 $ pip install git+https://github.com/EEKIM10/emenus.git
+```
+
+Or from [PyPi](https://pypi.org/project/eekues/0.1.0/):
+```shell script
+python -m pip install eekues>=0.1
 ```
 (or your system equivalent)
 
 ### Using
 #### case 1:
 ```python
-import emenus as menus
+import eekues as menus
 
 @bot.command(name="delete?")
 async def delete(ctx):
