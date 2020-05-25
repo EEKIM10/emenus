@@ -14,7 +14,7 @@ This can be done through git:
 $ pip install git+https://github.com/EEKIM10/emenus.git
 ```
 
-Or from [PyPi](https://pypi.org/project/eekues/0.1.0/):
+Or from [PyPi](https://pypi.org/project/eekues):
 ```shell script
 python -m pip install eekues>=0.1
 ```
@@ -41,6 +41,6 @@ from eekues import Confirm as C
 @commands.has_permissions(ban_members=True)
 @commands.bot_has_permissions(ban_members=True)
 async def ban(ctx, member: discord.Member):
-    if await C.result(ctx):
+    if await C().result(ctx):
         await member.ban()
 ```
