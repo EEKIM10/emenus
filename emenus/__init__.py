@@ -1,9 +1,28 @@
+import asyncio
+import random
 from datetime import datetime
 
 import discord
-from discord.ext.menus import Menu, button
+from discord.ext.menus import Menu, button, Button
 
 DEFAULT_CONF = "Are you sure?\n\n\N{WHITE HEAVY CHECK MARK} Yes!\n\N{CROSS MARK} No."
+DEFAULT_COLORs = {
+    "\U0001f534": {"name": "red", "value": 0xdd2e44},
+    "\U0001f7e0": {"name": "orange", "value": 0xffac33},
+    "\U0001f7e1": {"name": "yellow", "value": 0xfdcb58},
+    "\U0001f7e2": {"name": "green", "value": 0x78b159},
+    "\U0001f535": {"name": "blue", "value": 0x55acee},
+    "\U0001f7e3": {"name": "purple", "value": 0xaa8ed6},
+    "\U0001f7e4": {"name": "brown", "value": 0xc1694f},
+    "\U000026aa": {"name": "off white", "value": 0xe6e7e8},
+    "\U000026ab": {"name": "pretty much black", "value": 0x31373d}
+}
+
+__all__ = (
+    "Confirm",
+    "ColourSelector",
+    "ColorSelector"
+)
 
 
 class Confirm(Menu):
@@ -56,3 +75,63 @@ class Confirm(Menu):
         chan = channel or ctx.channel
         await self.start(ctx, channel=chan)
         return self.res
+
+
+class ColourSelector(Menu):
+    """
+    Selects from a list of colours that are provided.
+
+    To get custom emojis, you will need to provide the following data structure in the kwarg colo[u]rs:
+
+    {
+        "EMOJI_CODEPOINT": {"name": "colour name", "value": 0xHEX_VALUE}
+    }
+
+    to get an example, see the DEFAULT_COLORS const in this file.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ret = None
+        self.emojis = list(kwargs.get("colours", {}).keys()) or list(kwargs.get("colors", {}).keys()) or list(DEFAULT_COLORs.keys())
+        self._colours = kwargs.get("colours", {}) or kwargs.get("colors", {}) or DEFAULT_COLORs
+
+    async def callback(self, payload: discord.RawReactionActionEvent):
+        self.ret = self._colours[str(payload.emoji)]
+        self.bot.dispatch("colour_picked", self.ret)
+        self.stop()
+
+    async def send_initial_message(self, ctx, channel):
+        n = ""
+        for emoji, colour in self._colours.items():
+            n += f"{emoji}: {str(discord.Color(colour['value']))} ({colour['name']})\n"
+        e = discord.Embed(
+            title="Pick a colour:",
+            description=n,
+            colour=random.choice([c['value'] for c in self._colours.values()]),
+            timestamp=ctx.message.created_at
+        )
+        e.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url_as(static_format="png"))
+        # e.set_footer(text="Please wait until I've added every reaction.", icon_url="https://i.imgur.com/lagdj7g.png")
+        msg = await channel.send(embed=e)
+        for emoji in self._colours.keys():
+            self.add_button(Button(emoji, self.callback))
+            await msg.add_reaction(emoji)
+        return msg
+
+    async def result(self, ctx) -> discord.Colour:
+        """
+        Returns the result of the
+
+        :param ctx: the context
+        :return:
+        """
+        await self.start(ctx, wait=True)
+        self.ret = await self.bot.wait_for("colour_picked")
+        ret = self.ret["value"]
+        try:
+            return discord.Colour(ret)
+        except:
+            return self.ret["value"]
+
+ColorSelector = ColourSelector
