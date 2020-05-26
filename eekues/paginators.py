@@ -3,7 +3,7 @@ from datetime import datetime
 
 import discord
 from discord.ext import commands, menus
-from . import Selector
+from .helpers import Selector
 
 __all__ = (
     "EmbedPaginator",
