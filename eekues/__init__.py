@@ -1,8 +1,9 @@
+import asyncio
 import random
 from datetime import datetime
 
 import discord
-from discord.ext.menus import Menu, button, Button
+from discord.ext.menus import Menu, button, Button, MenuError
 from .paginators import EmbedPaginator, ScrollableEmbedPaginator
 from .helpers import Selector
 
@@ -25,7 +26,8 @@ __all__ = (
     "ColorSelector",
     "Selector",
     "ScrollableEmbedPaginator",
-    "EmbedPaginator"
+    "EmbedPaginator",
+    "DeletablePages"
 )
 
 
@@ -156,3 +158,35 @@ class ColourSelector(Menu):
             return self.ret["value"]
 
 ColorSelector = ColourSelector
+
+
+class DeletablePages(Menu):
+    """A paginator-like menu that allows for users to delete the menu's messages upon adding a reaction."""
+    def __init__(self, pages: list, **kwargs):
+        super().__init__(**kwargs)
+        if not pages:
+            raise MenuError("Pages is not set to an instance of list with at least 1 object")
+        self.pages = pages
+        self.messages = []
+
+    @button("\N{wastebasket}")
+    async def close(self, payload: discord.RawReactionActionEvent):
+        if payload.event_type != "REACTION_ADD":
+            return
+
+        if len(self.messages) > 100:
+            def check(msg):
+                return msg.author == self.bot.user and msg.id in [x.id for x in self.messages]
+            await self.ctx.channel.purge(limit=None, check=check, after=self.messages[-1])
+        else:
+            await self.ctx.channel.delete_messages(self.messages)
+        self.stop()
+
+    async def send_initial_message(self, ctx, channel):
+        if len(self.pages) > 5:
+            for page in self.pages:
+                self.messages.append(await channel.send(page))
+                await asyncio.sleep(1)  # ratelimit prevention
+        else:
+            for page in self.pages: self.messages.append(await channel.send(page))
+        return self.messages[-1]
